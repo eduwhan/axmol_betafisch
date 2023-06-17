@@ -1754,6 +1754,91 @@ BezierBy* BezierBy::reverse() const
 }
 
 //
+// BezierXZBy
+//
+//==============================
+BezierXZBy* BezierXZBy::create(float t, const ccBezierConfig& c)
+{
+    BezierXZBy* bezierBy = new (std::nothrow) BezierXZBy();
+    if (bezierBy && bezierBy->initWithDuration(t, c))
+    {
+        bezierBy->autorelease();
+        return bezierBy;
+    }
+
+    delete bezierBy;
+    return nullptr;
+}
+
+bool BezierXZBy::initWithDuration(float t, const ccBezierConfig& c)
+{
+    if (ActionInterval::initWithDuration(t))
+    {
+        _config = c;
+        return true;
+    }
+
+    return false;
+}
+
+void BezierXZBy::startWithTarget(Node* target)
+{
+    ActionInterval::startWithTarget(target);
+    _previousPosition = _startPosition = target->getPosition3D();
+}
+
+BezierXZBy* BezierXZBy::clone() const
+{
+    // no copy constructor
+    return BezierXZBy::create(_duration, _config);
+}
+
+void BezierXZBy::update(float time)
+{
+    if (_target)
+    {
+        float xa = 0;
+        float xb = _config.controlPoint_1.x;
+        float xc = _config.controlPoint_2.x;
+        float xd = _config.endPosition.x;
+
+        float ya = 0;
+        float yb = _config.controlPoint_1.y;
+        float yc = _config.controlPoint_2.y;
+        float yd = _config.endPosition.y;
+
+        float x = bezierat(xa, xb, xc, xd, time);
+        float y = bezierat(ya, yb, yc, yd, time);
+
+#if AX_ENABLE_STACKABLE_ACTIONS
+        Vec3 currentPos = _target->getPosition3D();
+        Vec3 diff       = currentPos - _previousPosition;
+        _startPosition  = _startPosition + diff;
+
+        Vec3 newPos = _startPosition + Vec3(x, 0.0f, y);
+        _target->setPosition3D(newPos);
+
+        _previousPosition = newPos;
+#else
+        _target->setPosition(_startPosition + Vec2(x, y));
+#endif  // !AX_ENABLE_STACKABLE_ACTIONS
+    }
+}
+
+BezierXZBy* BezierXZBy::reverse() const
+{
+    ccBezierConfig r;
+
+    r.endPosition    = -_config.endPosition;
+    r.controlPoint_1 = _config.controlPoint_2 + (-_config.endPosition);
+    r.controlPoint_2 = _config.controlPoint_1 + (-_config.endPosition);
+
+    BezierXZBy* action = BezierXZBy::create(_duration, r);
+    return action;
+}
+//==============================
+
+//
 // BezierTo
 //
 
@@ -1800,6 +1885,56 @@ BezierTo* BezierTo::reverse() const
     AXASSERT(false, "CCBezierTo doesn't support the 'reverse' method");
     return nullptr;
 }
+
+//
+// BezierXZTo
+//
+
+BezierXZTo* BezierXZTo::create(float t, const ccBezierConfig& c)
+{
+    BezierXZTo* bezierTo = new (std::nothrow) BezierXZTo();
+    if (bezierTo && bezierTo->initWithDuration(t, c))
+    {
+        bezierTo->autorelease();
+        return bezierTo;
+    }
+
+    delete bezierTo;
+    return nullptr;
+}
+
+bool BezierXZTo::initWithDuration(float t, const ccBezierConfig& c)
+{
+    if (ActionInterval::initWithDuration(t))
+    {
+        _toConfig = c;
+        return true;
+    }
+
+    return false;
+}
+
+BezierXZTo* BezierXZTo::clone() const
+{
+    // no copy constructor
+    return BezierXZTo::create(_duration, _toConfig);
+}
+
+void BezierXZTo::startWithTarget(Node* target)
+{
+    BezierXZBy::startWithTarget(target);
+    Vec2 m_startPosition(_startPosition.x, _startPosition.z);
+    _config.controlPoint_1 = _toConfig.controlPoint_1 - m_startPosition;
+    _config.controlPoint_2 = _toConfig.controlPoint_2 - m_startPosition;
+    _config.endPosition    = _toConfig.endPosition - m_startPosition;
+}
+
+BezierXZTo* BezierXZTo::reverse() const
+{
+    AXASSERT(false, "CCBezierTo doesn't support the 'reverse' method");
+    return nullptr;
+}
+
 
 //
 // ScaleTo

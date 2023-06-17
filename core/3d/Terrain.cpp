@@ -339,9 +339,12 @@ float Terrain::getHeight(float x, float z, Vec3* normal) const
         float d = getImageHeight(i + 1, j + 1) * getScaleY();
         if (normal)
         {
-            normal->x = c - b;
-            normal->y = 2;
-            normal->z = d - a;
+            //normal->x = c - b;
+            //normal->y = 2;
+            //normal->z = d - a;
+            normal->x = d - b;
+            normal->y = 0.1f;
+            normal->z = c - d;
             normal->normalize();
             //(*normal) = (1-u)*(1-v)*getNormal(i,j)+ (1-u)*v*getNormal(i,j+1) + u*(1-v)*getNormal(i+1,j)+
             // u*v*getNormal(i+1,j+1);
@@ -616,7 +619,7 @@ void Terrain::resetHeightMap(std::string_view heightMap)
 {
     _heightMapImage->release();
     _vertices.clear();
-    free(_data);
+    //free(_data);
     for (int i = 0; i < MAX_CHUNKES; ++i)
     {
         for (int j = 0; j < MAX_CHUNKES; j++)
