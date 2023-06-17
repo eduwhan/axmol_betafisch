@@ -1902,6 +1902,15 @@ Vec2 Node::convertToWorldSpace(const Vec2& nodePoint) const
     return Vec2(ret.x, ret.y);
 }
 
+Vec3 Node::convertToWorldSpace3D(const Vec3& nodePoint) const
+{
+    Mat4 tmp = getNodeToWorldTransform();
+    Vec3 vec3(nodePoint.x, nodePoint.y, nodePoint.z);
+    Vec3 ret;
+    tmp.transformPoint(vec3, &ret);
+    return Vec3(ret.x, ret.y, ret.z);
+}
+
 Vec2 Node::convertToNodeSpaceAR(const Vec2& worldPoint) const
 {
     Vec2 nodePoint(convertToNodeSpace(worldPoint));

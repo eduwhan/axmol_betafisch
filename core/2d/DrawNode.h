@@ -507,6 +507,8 @@ public:
 
     void drawTriangle(const Vec2& p1, const Vec2& p2, const Vec2& p3, const Color4B& color);
 
+    void drawSolidRoundedRect(const Vec2 &origin, const Vec2 &destination, float radius, unsigned int segments, const Color4F &color);
+
     void drawSolidTriangle(const Vec2* vertices3,
                            const Color4B& fillColor,
                            const Color4B& borderColor,

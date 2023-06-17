@@ -29,6 +29,6 @@
 namespace ax
 {
 
-EventCustom::EventCustom(std::string_view eventName) : Event(Type::CUSTOM), _userData(nullptr), _eventName(eventName) {}
+EventCustom::EventCustom(std::string_view eventName, void* userData) : Event(Type::CUSTOM), _userData(userData), _eventName(eventName) {}
 
 }

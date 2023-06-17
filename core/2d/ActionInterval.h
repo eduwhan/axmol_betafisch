@@ -949,6 +949,53 @@ private:
     AX_DISALLOW_COPY_AND_ASSIGN(BezierBy);
 };
 
+/** @class BezierXZBy
+ * @brief An action that moves the target with a cubic Bezier curve by a certain distance.
+ */
+class AX_DLL BezierXZBy : public ActionInterval
+{
+public:
+    /** Creates the action with a duration and a bezier configuration.
+     * @param t Duration time, in seconds.
+     * @param c Bezier config.
+     * @return An autoreleased BezierBy object.
+     * @code
+     * When this function bound to js or lua,the input params are changed.
+     * in js: var create(var t,var table)
+     * in lua: local create(local t, local table)
+     * @endcode
+     */
+    static BezierXZBy* create(float t, const ccBezierConfig& c);
+
+    //
+    // Overrides
+    //
+    virtual BezierXZBy* clone() const override;
+    virtual BezierXZBy* reverse() const override;
+    virtual void startWithTarget(Node* target) override;
+    /**
+     * @param time In seconds.
+     */
+    virtual void update(float time) override;
+
+    BezierXZBy() {}
+    virtual ~BezierXZBy() {}
+
+    /**
+     * initializes the action with a duration and a bezier configuration
+     * @param t in seconds
+     */
+    bool initWithDuration(float t, const ccBezierConfig& c);
+
+protected:
+    ccBezierConfig _config;
+    Vec3 _startPosition;
+    Vec3 _previousPosition;
+
+private:
+    AX_DISALLOW_COPY_AND_ASSIGN(BezierXZBy);
+};
+
 /** @class BezierTo
  * @brief An action that moves the target with a cubic Bezier curve to a destination point.
  @since v0.8.2
@@ -988,6 +1035,48 @@ protected:
 private:
     AX_DISALLOW_COPY_AND_ASSIGN(BezierTo);
 };
+
+//=======================================
+/** @class BezierXZTo
+* @brief An action that moves the target with a cubic Bezier curve to a destination point.
+@since v0.8.2
+*/
+class AX_DLL BezierXZTo : public BezierXZBy
+{
+public:
+    /** Creates the action with a duration and a bezier configuration.
+     * @param t Duration time, in seconds.
+     * @param c Bezier config.
+     * @return An autoreleased BezierTo object.
+     * @code
+     * when this function bound to js or lua,the input params are changed
+     * in js: var create(var t,var table)
+     * in lua: local create(local t, local table)
+     * @endcode
+     */
+    static BezierXZTo* create(float t, const ccBezierConfig& c);
+
+    //
+    // Overrides
+    //
+    virtual void startWithTarget(Node* target) override;
+    virtual BezierXZTo* clone() const override;
+    virtual BezierXZTo* reverse() const override;
+
+    BezierXZTo() {}
+    virtual ~BezierXZTo() {}
+    /**
+     * @param t In seconds.
+     */
+    bool initWithDuration(float t, const ccBezierConfig& c);
+
+protected:
+    ccBezierConfig _toConfig;
+
+private:
+    AX_DISALLOW_COPY_AND_ASSIGN(BezierXZTo);
+};
+
 
 /** @class ScaleTo
  @brief Scales a Node object to a zoom factor by modifying it's scale attribute.
