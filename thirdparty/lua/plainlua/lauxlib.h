@@ -8,6 +8,7 @@
 #ifndef lauxlib_h
 #define lauxlib_h
 
+#define STREAM_BUFFER_SIZE 256
 
 #include <stddef.h>
 #include <stdio.h>
@@ -248,6 +249,23 @@ typedef struct luaL_Stream {
 } luaL_Stream;
 
 /* }====================================================== */
+
+
+/*
+** {==================================================================
+** "Abstraction Layer" for basic report of messages and errors
+** ===================================================================
+*/
+
+LUALIB_API char * pop_stdout();
+LUALIB_API char * pop_stderr();
+LUALIB_API void push_stderr(char *format, const char *msg);
+//void lua_writestring(const void *ptr,  size_t nmemb);
+//void lua_writeline();
+//void lua_writestringerror(char *format, const char *msg);
+
+/* }================================================================== */
+
 
 /*
 ** {==================================================================
