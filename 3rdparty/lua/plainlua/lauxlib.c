@@ -1124,3 +1124,46 @@ LUALIB_API void luaL_checkversion_ (lua_State *L, lua_Number ver, size_t sz) {
                   (LUAI_UACNUMBER)ver, (LUAI_UACNUMBER)v);
 }
 
+
+static char std_out[STREAM_BUFFER_SIZE];
+static char std_err[STREAM_BUFFER_SIZE];
+static size_t std_idx = 0;
+static size_t stderr_idx = 0;
+
+LUALIB_API char * pop_stdout(){
+    std_out[std_idx] = '\0';
+    std_idx = 0;
+    return std_out;
+}
+
+LUALIB_API char * pop_stderr(){
+    std_err[stderr_idx] = '\0';
+    stderr_idx = 0;
+    return std_err;
+}
+
+
+LUALIB_API void push_stderr(char *format, const char *msg){
+    lua_writestringerror(format, msg);
+}
+
+//void lua_writestring(const void *ptr,  size_t nmemb) {
+//    if(std_idx + nmemb > STREAM_BUFFER_SIZE)
+//        nmemb = STREAM_BUFFER_SIZE - std_idx;
+//    memcpy(&std_out[std_idx], (void*)ptr, nmemb);
+//    std_idx += nmemb;
+//    fwrite(ptr, sizeof(char), nmemb, stdout);
+//}
+//
+//void lua_writeline() {
+//    lua_writestring("\n", 1);
+//    fflush(stdout);
+//}
+//
+//void lua_writestringerror(char *format, const char *msg) {
+//    sprintf(std_err, format, msg);
+//    stderr_idx = fprintf(stderr, format, msg);
+//    fflush(stderr);
+//}
+//
+
