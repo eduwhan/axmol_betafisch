@@ -26,6 +26,7 @@
 
 #include "lauxlib.h"
 
+#include "globalstreambuffer.h"
 
 #if !defined(MAX_SIZET)
 /* maximum value for size_t */
@@ -1111,45 +1112,84 @@ LUALIB_API void luaL_checkversion_ (lua_State *L, lua_Number ver, size_t sz) {
 }
 
 
-static char std_out[STREAM_BUFFER_SIZE];
-static char std_err[STREAM_BUFFER_SIZE];
-static size_t std_idx = 0;
-static size_t stderr_idx = 0;
+//LUALIB_API char * pop_stdout(){
+//    size_t size = sizeof(outBuffer.buffer);
+//    if(outBuffer.bufferOffset < size - 1) {
+//        outBuffer.buffer[outBuffer.bufferOffset + 1] = '\0';
+//    }else{
+//        outBuffer.buffer[size - 1] = '\0';
+//    }
+//    outBuffer.bufferOffset = 0;
+//    return outBuffer.buffer;
+//}
+//
+//LUALIB_API char * pop_stderr() {
+//    size_t size = sizeof(errBuffer.buffer);
+//    if(errBuffer.bufferOffset < size - 1) {
+//        errBuffer.buffer[errBuffer.bufferOffset + 1] = '\0';
+//    }else{
+//        errBuffer.buffer[size - 1] = '\0';
+//    }
+//    errBuffer.bufferOffset = 0;
+//    return errBuffer.buffer;
+//}
+
+
+char * pop_stream_buffer(CustomBuffer* buffer) {
+
+    size_t size = sizeof(buffer->buffer);
+    if(buffer->bufferOffset < size - 1) {
+        buffer->buffer[buffer->bufferOffset + 1] = '\0';
+    }else{
+        buffer->buffer[size - 1] = '\0';
+    }
+    buffer->bufferOffset = 0;
+    return buffer->buffer;
+}
 
 LUALIB_API char * pop_stdout(){
-    std_out[std_idx] = '\0';
-    std_idx = 0;
-    return std_out;
+    return pop_stream_buffer(&outBuffer);
 }
 
-LUALIB_API char * pop_stderr(){
-    std_err[stderr_idx] = '\0';
-    stderr_idx = 0;
-    return std_err;
+LUALIB_API char * pop_stderr() {
+    return pop_stream_buffer(&errBuffer);
 }
-
 
 LUALIB_API void push_stderr(char *format, const char *msg){
     lua_writestringerror(format, msg);
 }
 
-//void lua_writestring(const void *ptr,  size_t nmemb) {
-//    if(std_idx + nmemb > STREAM_BUFFER_SIZE)
-//        nmemb = STREAM_BUFFER_SIZE - std_idx;
-//    memcpy(&std_out[std_idx], (void*)ptr, nmemb);
-//    std_idx += nmemb;
-//    fwrite(ptr, sizeof(char), nmemb, stdout);
-//}
-//
-//void lua_writeline() {
-//    lua_writestring("\n", 1);
-//    fflush(stdout);
-//}
-//
-//void lua_writestringerror(char *format, const char *msg) {
-//    sprintf(std_err, format, msg);
-//    stderr_idx = fprintf(stderr, format, msg);
-//    fflush(stderr);
-//}
-//
+LUALIB_API void lua_writestring(const void *ptr,  size_t nmemb) {
+    if (ptr == NULL || outBuffer.bufferOffset >= sizeof(outBuffer.buffer)) {
+        return;
+    }
 
+    size_t toWrite = (nmemb > sizeof(outBuffer.buffer) - outBuffer.bufferOffset) ? (sizeof(outBuffer.buffer) - outBuffer.bufferOffset) : nmemb;
+    memcpy(outBuffer.buffer + outBuffer.bufferOffset, ptr, toWrite);
+    outBuffer.bufferOffset += toWrite;
+    fwrite(ptr, sizeof(char), nmemb, stdout);
+}
+
+LUALIB_API void lua_writeline() {
+    lua_writestring("\n", 1);
+    fflush(stdout);
+}
+
+LUALIB_API void lua_writestringerror(char *format, const char *msg) {
+    if (format == NULL || msg == NULL || errBuffer.bufferOffset >= sizeof(errBuffer.buffer)) {
+        return; // Handle null pointers or buffer overflow
+    }
+
+    // Determine the remaining space in the buffer
+    size_t spaceRemaining = sizeof(errBuffer.buffer) - errBuffer.bufferOffset;
+
+    // Write the formatted error message to the buffer
+    int written = snprintf(errBuffer.buffer + errBuffer.bufferOffset, spaceRemaining, format, msg);
+
+    if (written > 0) {
+        errBuffer.bufferOffset += written;
+    }
+
+    fprintf(stderr, format, msg);
+    fflush(stderr);
+}
