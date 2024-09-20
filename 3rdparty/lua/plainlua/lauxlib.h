@@ -8,8 +8,6 @@
 #ifndef lauxlib_h
 #define lauxlib_h
 
-#define STREAM_BUFFER_SIZE 256
-
 #include <stddef.h>
 #include <stdio.h>
 
@@ -260,9 +258,9 @@ typedef struct luaL_Stream {
 LUALIB_API char * pop_stdout();
 LUALIB_API char * pop_stderr();
 LUALIB_API void push_stderr(char *format, const char *msg);
-//void lua_writestring(const void *ptr,  size_t nmemb);
-//void lua_writeline();
-//void lua_writestringerror(char *format, const char *msg);
+void lua_writestring(const void *ptr,  size_t nmemb);
+void lua_writeline();
+void lua_writestringerror(char *format, const char *msg);
 
 /* }================================================================== */
 
@@ -273,21 +271,21 @@ LUALIB_API void push_stderr(char *format, const char *msg);
 ** ===================================================================
 */
 
-/* print a string */
-#if !defined(lua_writestring)
-#define lua_writestring(s,l)   fwrite((s), sizeof(char), (l), stdout)
-#endif
-
-/* print a newline and flush the output */
-#if !defined(lua_writeline)
-#define lua_writeline()        (lua_writestring("\n", 1), fflush(stdout))
-#endif
-
-/* print an error message */
-#if !defined(lua_writestringerror)
-#define lua_writestringerror(s,p) \
-        (fprintf(stderr, (s), (p)), fflush(stderr))
-#endif
+///* print a string */
+//#if !defined(lua_writestring)
+//#define lua_writestring(s,l)   fwrite((s), sizeof(char), (l), stdout)
+//#endif
+//
+///* print a newline and flush the output */
+//#if !defined(lua_writeline)
+//#define lua_writeline()        (lua_writestring("\n", 1), fflush(stdout))
+//#endif
+//
+///* print an error message */
+//#if !defined(lua_writestringerror)
+//#define lua_writestringerror(s,p) \
+//        (fprintf(stderr, (s), (p)), fflush(stderr))
+//#endif
 
 /* }================================================================== */
 
