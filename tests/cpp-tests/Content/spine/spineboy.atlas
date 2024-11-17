@@ -31,7 +31,7 @@ gun
 	rotate: 90
 head
 	bounds: 80, 105, 136, 149
-hoverboard-board
+hoverboard-matrix
 	bounds: 2, 8, 246, 76
 	rotate: 90
 hoverboard-thruster
